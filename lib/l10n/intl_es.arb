@@ -1,0 +1,19 @@
+{
+    "appName": "Notes App",
+    "search": "Buscar",
+    "done": "Hecho",
+    "accept": "Aceptar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "deleteNote": "¿Eliminar nota?",
+    "deleteNoteDescription": "¿Seguro que quieres eliminar la nota?, esta acción no se puede deshacer.",
+    "note": "{count, plural, =1 {Nota} other{Notas}}",
+    "allTime": "Notas guardadas",
+    "pinned": "Notas Favoritas",
+    "notNoteYet": "Aún no tienes notas guardadas",
+    "noteTitle": "Título",
+    "noteDescription": "Descripción",
+    "titleRequired": "El título y la nota es requerido",
+    "todayAt": "Hoy {date} a las {hour}",
+    "label": "Etiqueta"
+}

@@ -1,0 +1,19 @@
+{
+    "appName": "Notes App",
+    "search": "Search",
+    "done": "Done",
+    "accept": "Accept",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteNote": "Delete Note?",
+    "deleteNoteDescription": "Are you sure you want to delete the note?, this action can't be undone.",
+    "note": "{count, plural, =1 {Note} other{Notes}}",
+    "allTime": "All Time",
+    "pinned": "Pinned",
+    "notNoteYet": "No notes yet",
+    "noteTitle": "Title",
+    "noteDescription": "Description",
+    "titleRequired": "Title and note is required",
+    "todayAt": "Hoy {date} a las {hour}",
+    "label": "Label"
+}

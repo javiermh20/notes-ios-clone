@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:notes_javiermh/views/home/HomeScreen.dart';
+import 'package:notes_javiermh/views/note/NoteHomeScreen.dart';
 import 'package:notes_javiermh/views/splashscreen/SplashScreen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:notes_javiermh/generated/l10n.dart';
 
 class AppNotes extends StatelessWidget {
   const AppNotes({super.key});
@@ -8,8 +10,14 @@ class AppNotes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: const [
+        Translate.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: Translate.delegate.supportedLocales,
       title: 'Notes',
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.light,
         fontFamily: 'Roboto',
@@ -20,8 +28,9 @@ class AppNotes extends StatelessWidget {
       ),
       routes: {
         '/': (context) => const SplashScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const NoteHomeScreen(),
       },
+      debugShowCheckedModeBanner: false,
     );
   }
 }
