@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:notes_javiermh/generated/l10n.dart';
-import 'package:toastification/toastification.dart';
+
 import 'package:notes_javiermh/models/Note.dart';
 
-// ignore: must_be_immutable
+import 'package:notes_javiermh/generated/l10n.dart';
+import 'package:toastification/toastification.dart';
+
 class NoteAddScreen extends StatefulWidget {
-  Note? note;
-  NoteAddScreen({super.key, this.note});
+  const NoteAddScreen({super.key});
 
   @override
   State<NoteAddScreen> createState() => _NoteAddScreenState();
@@ -26,14 +26,20 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
   @override
   void initState() {
     super.initState();
-    if(widget.note != null){
-      note = widget.note!;
-      _titleController.text = note.title;
-      _contentDescription.text = note.description;
-      note.folder != '' || note.folder != null ? folder = note.folder ?? '' : folder = '';
-    }
     date = DateTime.now().toString().substring(0, 10);
     hour = DateTime.now().toString().substring(11, 16);
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final arguments = ModalRoute.of(context)?.settings.arguments;
+    if (arguments is Note) {
+      note = arguments;
+      _titleController.text = note.title;
+      _contentDescription.text = note.description;
+      folder = note.folder ?? '';
+    }
   }
 
   @override
@@ -72,7 +78,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                        child: widget.note?.folder == null 
+                        child: note.folder == null 
                           ? Text(Translate.current.label, style: const TextStyle(fontSize: 12)) 
                           : Text(folder, style: const TextStyle(fontSize: 12)
                         ),

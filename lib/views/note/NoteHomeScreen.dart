@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:notes_javiermh/generated/l10n.dart';
 import 'package:notes_javiermh/models/Note.dart';
 import 'package:notes_javiermh/utils/Utils.dart';
-import 'package:notes_javiermh/views/note/NoteAddScreen.dart';
+
+import 'package:hive/hive.dart';
 
 class NoteHomeScreen extends StatefulWidget {
   const NoteHomeScreen({super.key});
@@ -15,46 +17,36 @@ class NoteHomeScreen extends StatefulWidget {
 class _NoteHomeScreenState extends State<NoteHomeScreen> {
   bool showPinnedNotes = true;
   bool isSelectedView = false;
-
-  List<Note> notes = [
-    Note(
-      title: 'Meeting with the team',
-      description: 'Discuss the new project',
-      date: '2024-07-07',
-      hour: '10:00 AM',
-      folder: 'Work',
-    ),
-    Note(
-      title: 'Buy groceries',
-      description: 'Milk, eggs, bread, and fruits',
-      date: '2024-07-01',
-      hour: '10:00 AM',
-      folder: 'Personal',
-    ),
-    Note(
-        title: 'Mexico and USA trip',
-        description: 'Discuss the trip in Mexico and USA',
-        date: '2021-06-25',
-        hour: '10:00 PM'),
-  ];
-  List<Note> pinnedNotes = [];
-
+  late List<Note> notes;
+  late List<Note> pinnedNotes = [];
+  Box notesBox = Hive.box('Notes');
   TextEditingController searchNoteController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    notesBox.containsKey('notes') 
+      ? notes = notesBox.get('notes', defaultValue: []).cast<Note>() 
+      : notes = [];
+    notesBox.containsKey('pinnedNotes') 
+      ? notes = notesBox.get('pinnedNotes', defaultValue: []).cast<Note>() 
+      : pinnedNotes = [];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          MediaQuery.of(context).platformBrightness == Brightness.dark
-              ? const Color.fromRGBO(0, 0, 0, 1)
-              : const Color.fromRGBO(242, 242, 247, 1),
+        MediaQuery.of(context).platformBrightness == Brightness.dark
+          ? const Color.fromRGBO(0, 0, 0, 1)
+          : const Color.fromRGBO(242, 242, 247, 1),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             backgroundColor:
-                MediaQuery.of(context).platformBrightness == Brightness.dark
-                    ? const Color.fromRGBO(0, 0, 0, 1)
-                    : const Color.fromRGBO(242, 242, 247, 1),
+              MediaQuery.of(context).platformBrightness == Brightness.dark
+                ? const Color.fromRGBO(0, 0, 0, 1)
+                : const Color.fromRGBO(242, 242, 247, 1),
             pinned: true,
             expandedHeight: 100.0,
             flexibleSpace: LayoutBuilder(
@@ -75,10 +67,9 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
             ),
             actions: [
               IconButton(
-                icon: const Icon(CupertinoIcons.ellipsis_circle,
-                    color: Colors.amberAccent),
+                icon: const Icon(CupertinoIcons.ellipsis_circle, color: Colors.amberAccent),
                 onPressed: () {
-                  // show optionsMenu
+                  // TODO show optionsMenu with style
                 },
               ),
             ],
@@ -110,8 +101,8 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
                                 },
                                 icon: Icon(
                                   showPinnedNotes
-                                      ? CupertinoIcons.chevron_down
-                                      : CupertinoIcons.right_chevron,
+                                    ? CupertinoIcons.chevron_down
+                                    : CupertinoIcons.right_chevron,
                                   color: Colors.amberAccent,
                                   size: 20,
                                 ),
@@ -128,20 +119,32 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
                     ),
                   ),
                   SizedBox(height: pinnedNotes.isNotEmpty ? 12 : 0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(CupertinoIcons.calendar, size: 18, color: Colors.amberAccent),
-                          const SizedBox(width: 6),
-                          Text(Translate.current.allTime, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                        ],
+                  Visibility(
+                    visible: notes.isNotEmpty,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(CupertinoIcons.calendar, size: 18, color: Colors.amberAccent),
+                            const SizedBox(width: 6),
+                            Text(Translate.current.allTime, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        containerNote(notes),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
+                  ),
+                  Visibility(
+                    visible: notes.isEmpty && pinnedNotes.isEmpty,
+                    child: Center(
+                      child: Text(
+                        Translate.current.notNoteYet, 
+                        style: const TextStyle(fontSize: 16),
                       ),
-                      const SizedBox(height: 6),
-                      containerNote(notes),
-                      const SizedBox(height: 12),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -151,35 +154,34 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
       ),
       bottomNavigationBar: Container(
         color: MediaQuery.of(context).platformBrightness == Brightness.dark
-            ? const Color.fromRGBO(16, 13, 20, 1)
-            : const Color.fromRGBO(231, 229, 240, 1),
+          ? const Color.fromRGBO(16, 13, 20, 1)
+          : const Color.fromRGBO(231, 229, 240, 1),
         width: double.infinity,
         height: 50,
         child: Stack(
           children: [
             Center(
-              child: notes.isEmpty
-                  ? Text(Translate.current.notNoteYet,
-                      style: const TextStyle(fontSize: 14),
-                      textAlign: TextAlign.center)
-                  : Text(
-                      '${notes.length} ${Translate.current.note(notes.length == 1 ? 1 : 0).toLowerCase()}',
-                      style: const TextStyle(fontSize: 14),
-                      textAlign: TextAlign.center,
-                    ),
+              child: notes.isEmpty && pinnedNotes.isEmpty
+                ? Text(
+                    Translate.current.notNoteYet,
+                    style: const TextStyle(fontSize: 14),
+                    textAlign: TextAlign.center,
+                  )
+                : Text(
+                    '${notes.length + pinnedNotes.length} ${Translate.current.note(notes.length + pinnedNotes.length == 1 ? 1 : 0).toLowerCase()}',
+                    style: const TextStyle(fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
             ),
             Positioned(
               right: 0,
               child: IconButton(
                 onPressed: () async {
-                  Note? note = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NoteAddScreen(),
-                    ),
-                  );
-                  if (note == null) return;
-                  setState(() => notes.add(note));
+                  Navigator.pushNamed<Note?>(context, '/noteAdd').then((note) {
+                    if (note == null) return;
+                    setState(() => notes.add(note));
+                    notesBox.put('notes', notes);
+                  });
                 },
                 icon: const Icon(CupertinoIcons.square_pencil, color: Colors.amberAccent),
               ),
@@ -194,8 +196,8 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
     return Container(
       decoration: BoxDecoration(
         color: MediaQuery.of(context).platformBrightness == Brightness.dark
-            ? const Color.fromRGBO(28, 28, 30, 1)
-            : Colors.white,
+          ? const Color.fromRGBO(28, 28, 30, 1)
+          : Colors.white,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -205,11 +207,19 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
               children: [
                 InkWell(
                   onTap: () async {
-                    Note? note = await Navigator.push(context, MaterialPageRoute(builder: (context) => NoteAddScreen(note: i)));
-                    if (note == null) return;
-                    setState(() {
-                      notes.remove(i);
-                      notes.add(note);
+                    Navigator.pushNamed(context, '/noteAdd', arguments: i).then((note) {
+                      if (note == null) return;
+                      setState(() {
+                        if (pinnedNotes.contains(i)) {
+                          pinnedNotes.remove(i);
+                          pinnedNotes.add(note as Note);
+                          notesBox.put('pinnedNotes', pinnedNotes);
+                        } else {
+                          notes.remove(i);
+                          notes.add(note as Note);
+                          notesBox.put('notes', notes);
+                        }
+                      });
                     });
                   },
                   child: contentCard(i),
@@ -230,27 +240,24 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
           content: Text(Translate.current.deleteNoteDescription),
           actions: [
             TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.amberAccent,
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.amberAccent),
               onPressed: () {
                 Navigator.pop(context);
               },
               child: Text(Translate.current.cancel),
             ),
             TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.amberAccent,
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.amberAccent),
               onPressed: () {
                 if (pinnedNotes.contains(note)) {
                   setState(() {
                     pinnedNotes.remove(note);
+                    notesBox.put('pinnedNotes', pinnedNotes);
                   });
                 }
-
                 setState(() {
                   notes.remove(note);
+                  notesBox.put('notes', notes);
                 });
                 Navigator.pop(context);
               },
@@ -275,34 +282,43 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
-                pinnedNotes.contains(note)
-                    ? CupertinoIcons.pin_slash_fill
-                    : CupertinoIcons.pin_fill,
-                color: Colors.white),
+              pinnedNotes.contains(note)
+                ? CupertinoIcons.pin_slash_fill
+                : CupertinoIcons.pin_fill,
+              color: Colors.white,
+            ),
           ),
         ),
         Positioned(
           right: 1,
           top: 1,
           child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-              decoration: BoxDecoration(
-                color: Colors.redAccent,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(CupertinoIcons.delete_solid, color: Colors.white)),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+            decoration: BoxDecoration(
+              color: Colors.redAccent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(CupertinoIcons.delete_solid, color: Colors.white),
+          ),
         ),
         Dismissible(
           confirmDismiss: (direction) async {
             if (direction == DismissDirection.endToStart) {
-              // delete note
               dialogDeleteNote(note);
               return false;
             } else {
               setState(() {
-                pinnedNotes.contains(note)
-                    ? pinnedNotes.remove(note)
-                    : pinnedNotes.add(note);
+                if(pinnedNotes.contains(note)) {
+                  notes.add(note);
+                  pinnedNotes.remove(note);
+                  notesBox.put('pinnedNotes', pinnedNotes);
+                  notesBox.put('notes', notes);
+                } else {
+                  pinnedNotes.add(note);
+                  notes.remove(note);
+                  notesBox.put('pinnedNotes', pinnedNotes);
+                  notesBox.put('notes', notes);
+                }
               });
               return true;
             }
@@ -316,7 +332,10 @@ class _NoteHomeScreenState extends State<NoteHomeScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: ListTile(
-              title: Text(Utils().truncateWithEllipsis(30, note.title), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              title: Text (
+                Utils().truncateWithEllipsis(30, note.title), 
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

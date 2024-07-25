@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:notes_javiermh/views/note/NoteHomeScreen.dart';
-import 'package:notes_javiermh/views/splashscreen/SplashScreen.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:notes_javiermh/generated/l10n.dart';
 
+import 'package:notes_javiermh/views/splashscreen/SplashScreen.dart';
+import 'package:notes_javiermh/views/note/NoteAddScreen.dart';
+import 'package:notes_javiermh/views/note/NoteHomeScreen.dart';
+
+import 'package:notes_javiermh/generated/l10n.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 class AppNotes extends StatelessWidget {
   const AppNotes({super.key});
 
@@ -29,6 +31,7 @@ class AppNotes extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/home': (context) => const NoteHomeScreen(),
+        '/noteAdd': (context) =>  const NoteAddScreen(),
       },
       debugShowCheckedModeBanner: false,
     );

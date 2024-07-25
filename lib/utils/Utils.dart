@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 class Utils{
   String truncateWithEllipsis(int cutoff, String myString) {
